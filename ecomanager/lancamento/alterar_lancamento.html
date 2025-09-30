@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Alterar lançamento</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand"><div class="logo">E</div><h1>Alterar lançamento</h1></div>
+      <div class="nav"><a class="btn ghost" href="./index.html">Voltar</a></div>
+    </div>
+
+    <div class="card">
+      <input type="hidden" id="id">
+      <div class="row cols-2">
+        <div>
+          <label class="label">Data</label>
+          <input type="date" id="data_mov" class="input">
+        </div>
+        <div>
+          <label class="label">Descrição</label>
+          <input type="text" id="descricao" class="input">
+        </div>
+      </div>
+
+      <div class="row cols-3" style="margin-top:14px">
+        <div>
+          <label class="label">Tipo</label>
+          <select id="tipo">
+            <option value="DESPESA">DESPESA</option>
+            <option value="RECEITA">RECEITA</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Categoria</label>
+          <select id="id_categoria"></select>
+        </div>
+        <div>
+          <label class="label">Valor (R$)</label>
+          <input type="number" step="0.01" id="valor" class="input">
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label class="label">Família (opcional)</label>
+        <input type="number" id="id_familia" class="input" placeholder="id_familia">
+      </div>
+
+      <div class="form-actions" style="margin-top:16px">
+        <button class="btn primary" id="enviar">Salvar alterações</button>
+        <a class="btn ghost" href="./index.html">Cancelar</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/get_lancamento.js"></script>
+  <script src="../js/alterar_lancamento.js"></script>
+</body></html>

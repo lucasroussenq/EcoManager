@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Novo Lançamento • EcoManager</title>
+  <link rel="stylesheet" href="../css/styles.css?v=7"/>
+</head>
+<body>
+  <div class="container">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div>
+          <h1>EcoManager</h1>
+          <p class="muted">Novo Lançamento</p>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-secondary" href="./index.html">Voltar</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <form id="formLanc">
+        <div class="row" style="gap:12px">
+          <div style="flex:1 1 220px">
+            <label>Data</label>
+            <input type="date" name="data" required/>
+          </div>
+          <div style="flex:2 1 320px">
+            <label>Descrição</label>
+            <input type="text" name="descricao" placeholder="ex: Mercado, Energia..." required/>
+          </div>
+          <div style="flex:1 1 220px">
+            <label>Categoria</label>
+            <select name="id_categoria" class="select" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+          <div style="flex:1 1 220px">
+            <label>Natureza</label>
+            <select name="natureza" class="select" required>
+              <option value="">Selecione...</option>
+              <option value="E">Entrada</option>
+              <option value="S">Saída</option>
+            </select>
+          </div>
+          <div style="flex:1 1 180px">
+            <label>Valor</label>
+            <input type="number" name="valor" step="0.01" min="0" required/>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" type="submit">Salvar</button>
+          <a class="btn btn-secondary" href="./index.html">Cancelar</a>
+        </div>
+
+        <p id="msgLanc" class="msg-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // TODO: carregar categorias de ../php/categoria_listar.php
+    // submit para ../php/lancamento_inserir.php
+    document.getElementById('formLanc').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const msg = document.getElementById('msgLanc');
+      msg.textContent = '';
+      try{
+        const r = await fetch('../php/lancamento_inserir.php',{ method:'POST', body: fd });
+        const j = await r.json();
+        if(j.ok){ location.href = './index.html'; }
+        else { msg.textContent = j.msg || 'Não foi possível salvar.'; }
+      }catch{ msg.textContent = 'Erro de rede.'; }
+    });
+  </script>
+</body>
+</html>

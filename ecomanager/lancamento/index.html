@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lançamentos • EcoManager</title>
+  <link rel="stylesheet" href="../css/styles.css?v=7"/>
+</head>
+<body>
+  <div class="container">
+
+    <!-- topo -->
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div>
+          <h1>EcoManager</h1>
+          <p class="muted">Meus Lançamentos</p>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="./inserir_lancamento.html" class="btn">Novo lançamento</a>
+        <button id="btnLogout" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+
+    <!-- filtros -->
+    <div class="card toolbar">
+      <div class="grid-3">
+        <div>
+          <label>Período</label>
+          <input id="filtroPeriodo" class="input" type="month"/>
+        </div>
+        <div>
+          <label>Categoria</label>
+          <select id="filtroCategoria" class="select">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div>
+          <label>Natureza</label>
+          <select id="filtroNatureza" class="select">
+            <option value="">Todas</option>
+            <option value="E">Entrada</option>
+            <option value="S">Saída</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="app-kpis">
+      <div class="kpi">
+        <div class="kpi-title">Entradas</div>
+        <div id="kpiEntradas" class="kpi-value ok">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-title">Saídas</div>
+        <div id="kpiSaidas" class="kpi-value warn">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-title">Saldo</div>
+        <div id="kpiSaldo" class="kpi-value">R$ 0,00</div>
+      </div>
+    </div>
+
+    <!-- tabela -->
+    <div class="card table">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Natureza</th>
+            <th>Valor</th>
+            <th style="width:140px">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyLancamentos">
+          <!-- linhas via JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+   
+    const dados = [
+      {id:1, data:'2025-09-28', desc:'Mercado', categoria:'Alimentação', nat:'S', valor: 120.50},
+      {id:2, data:'2025-09-27', desc:'Salário', categoria:'Renda', nat:'E', valor: 4500.00},
+      {id:3, data:'2025-09-26', desc:'Energia', categoria:'Moradia', nat:'S', valor: 230.00},
+    ];
+
+    const tbody = document.getElementById('tbodyLancamentos');
+    const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+    function render(){
+      tbody.innerHTML = '';
+      let entradas=0, saidas=0;
+      for(const l of dados){
+        if(l.nat==='E') entradas+=l.valor; else saidas+=l.valor;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(l.data).toLocaleDateString('pt-BR')}</td>
+          <td>${l.desc}</td>
+          <td>${l.categoria}</td>
+          <td>${l.nat==='E'?'Entrada':'Saída'}</td>
+          <td>${fmt(l.valor)}</td>
+          <td class="actions-cell">
+            <a href="./inserir_lancamento.html?id=${l.id}">Editar</a>
+            <a href="#" onclick="remover(${l.id});return false;">Excluir</a>
+          </td>`;
+        tbody.appendChild(tr);
+      }
+      document.getElementById('kpiEntradas').textContent = fmt(entradas);
+      document.getElementById('kpiSaidas').textContent   = fmt(saidas);
+      document.getElementById('kpiSaldo').textContent    = fmt(entradas - saidas);
+    }
+
+    function remover(id){
+      alert('Excluir id '+id+' (implementar no PHP)');
+    }
+
+    document.getElementById('btnLogout').addEventListener('click', async ()=>{
+      try{ await fetch('../php/auth_logout.php'); }catch{}
+      location.href = '../auth/login.html';
+    });
+
+    render();
+  </script>
+</body>
+</html>
