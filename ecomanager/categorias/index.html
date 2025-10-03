@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categorias • EcoManager</title>
+<link rel="stylesheet" href="../css/styles.css">
+<script defer src="../js/categoria.js"></script>
+</head><body>
+<div class="container" style="max-width:880px;margin:30px auto">
+  <div class="app-top">
+    <div class="app-brand"><div class="auth-icon">E</div><div><h1 style="margin:0">EcoManager</h1><p style="margin:0;color:var(--muted)">Categorias</p></div></div>
+    <a class="btn btn-secondary" href="../lancamento/index.html">Voltar</a>
+  </div>
+
+  <div class="card">
+    <form id="formCat" class="row" style="gap:10px">
+      <input type="hidden" id="id_categoria" name="id_categoria">
+      <div class="col" style="min-width:220px">
+        <label>Nome</label>
+        <input id="nome" name="nome" required>
+      </div>
+      <div class="col" style="min-width:180px">
+        <label>Natureza</label>
+        <select id="id_natureza" name="id_natureza" required>
+          <option value="1">Entrada</option>
+          <option value="2">Saída</option>
+        </select>
+      </div>
+      <button class="btn" type="submit">Salvar</button>
+      <button class="btn btn-secondary" type="button" id="btnNovo">Novo</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <table class="table">
+      <thead><tr><th>#</th><th>Nome</th><th>Natureza</th><th>Ações</th></tr></thead>
+      <tbody id="lista"></tbody>
+    </table>
+  </div>
+</div>
+</body></html>

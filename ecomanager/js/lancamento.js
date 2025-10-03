@@ -1,112 +1,97 @@
-const fmtBRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const $ = sel => document.querySelector(sel);
 
-const $mes = document.getElementById('mes');
-const $tipo = document.getElementById('tipo');
-const $cat  = document.getElementById('f_categoria');
-const $btnFiltrar = document.getElementById('btnFiltrar');
-const $btnLimpar  = document.getElementById('btnLimpar');
-const $btnSair    = document.getElementById('btnSair');
+const $lista = $('#lista');
+const $msgLista = $('#msgLista');
+const $kpiReceitas = $('#kpi_receitas');
+const $kpiDespesas = $('#kpi_despesas');
+const $kpiSaldo = $('#kpi_saldo');
+const $mes = $('#mes');
+const $tipo = $('#tipo');
+const $f_categoria = $('#f_categoria');
+const $btnFiltrar = $('#btnFiltrar');
+const $btnLimpar = $('#btnLimpar');
+const $btnSair = $('#btnSair');
 
-const $kDespesas = document.getElementById('kpi_despesas');
-const $kReceitas = document.getElementById('kpi_receitas');
-const $kSaldo    = document.getElementById('kpi_saldo');
+// Função para formatar valor
+function formatarValor(v){
+  return `R$ ${v.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+}
 
-const $lista   = document.getElementById('lista');
-const $msgLista = document.getElementById('msgLista');
-
-// mês padrão = atual (YYYYMM)
-(function setMesPadrao(){
-  const d = new Date();
-  const y = d.getFullYear().toString();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  $mes.value = `${y}${m}`;
-})();
-
-// carregar categorias (filtro)
-async function carregarCategoriasFiltro() {
-  try {
-    const res = await fetch('../php/get_categorias.php');
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.msg || 'Falha ao obter categorias');
-    // mantém a opção "Todas"
-    data.categorias.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.id_categoria;
-      opt.textContent = c.nome;
-      $cat.appendChild(opt);
+// Carrega categorias no filtro
+async function carregarCategorias(){
+  const r = await fetch('../php/get_categorias.php', {credentials:'include'});
+  const j = await r.json();
+  if(j.ok){
+    $f_categoria.innerHTML = '<option value="">Todas</option>';
+    j.categorias.forEach(c=>{
+      const o = document.createElement('option');
+      o.value = c.id_categoria;
+      o.textContent = c.nome;
+      $f_categoria.appendChild(o);
     });
-  } catch (e) {
-    console.error(e);
   }
 }
 
-// listar lançamentos
-async function listar() {
-  $msgLista.style.display = 'none';
-  $lista.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
-  try {
-    const p = new URLSearchParams();
-    if ($mes.value.trim()) p.set('mes', $mes.value.trim());
-    if ($tipo.value)       p.set('tipo', $tipo.value);
-    if ($cat.value)        p.set('id_categoria', $cat.value);
+// Carrega lançamentos
+async function carregarLancamentos(){
+  $msgLista.style.display='none';
+  $lista.innerHTML = '';
 
-    const res = await fetch(`../php/get_lancamento.php?${p.toString()}`);
-    const data = await res.json();
+  const params = new URLSearchParams();
+  if($mes.value.trim()) params.set('mes',$mes.value.trim());
+  if($tipo.value.trim()) params.set('tipo',$tipo.value.trim());
+  if($f_categoria.value.trim()) params.set('id_categoria',$f_categoria.value.trim());
 
-    if (!data.ok) throw new Error(data.msg || 'Erro ao listar');
-
-    // KPIs
-    const { receitas=0, despesas=0, saldo=0 } = data.totais || {};
-    $kReceitas.textContent = fmtBRL(receitas);
-    $kDespesas.textContent = fmtBRL(despesas);
-    $kSaldo.textContent    = fmtBRL(saldo);
-
-    // Tabela
-    if (!data.registros || data.registros.length === 0) {
-      $lista.innerHTML = '<tr><td colspan="7">Nenhum lançamento encontrado.</td></tr>';
-      return;
-    }
-
-    $lista.innerHTML = data.registros.map((r, i) => `
-      <tr>
-        <td>${i+1}</td>
-        <td>${r.data_br}</td>
-        <td>${r.tipo}</td>
-        <td>${r.categoria ?? '-'}</td>
-        <td>${r.descricao ?? '-'}</td>
-        <td>${fmtBRL(Number(r.valor||0))}</td>
-        <td>
-          <a href="#" data-id="${r.id}" class="acao-editar" style="margin-right:8px">Editar</a>
-          <a href="#" data-id="${r.id}" class="acao-excluir">Excluir</a>
-        </td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    console.error(e);
-    $lista.innerHTML = '';
-    $msgLista.textContent = 'Erro ao carregar lançamentos.';
-    $msgLista.style.display = 'block';
-  }
-}
-
-$btnFiltrar.addEventListener('click', listar);
-$btnLimpar.addEventListener('click', () => {
-  $mes.value = '';
-  $tipo.value = '';
-  $cat.value = '';
-  listar();
-});
-
-$btnSair?.addEventListener('click', async () => {
-  try {
-    const r = await fetch('../php/auth_logout.php', { method: 'POST' });
+  try{
+    const r = await fetch(`../php/get_lancamentos.php?${params.toString()}`, {credentials:'include'});
     const j = await r.json();
-    // vai para a tela pública/raiz do módulo
-    window.location.href = '../index.html';
-  } catch (_) {
-    window.location.href = '../index.html';
-  }
-});
+    if(!j.ok) throw new Error(j.msg || 'Erro ao carregar');
 
-// inicialização
-carregarCategoriasFiltro().then(listar);
+    let html='';
+    j.registros.forEach((l,i)=>{
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${l.data_br}</td>
+        <td>${l.tipo}</td>
+        <td>${l.categoria||''}</td>
+        <td>${l.descricao}</td>
+        <td>${formatarValor(l.valor)}</td>
+        <td>
+          <a href="./alterar_lancamento.html?id=${l.id}">Editar</a> |
+          <a href="#" onclick="excluirLancamento(${l.id});return false;">Excluir</a>
+        </td>
+      </tr>`;
+    });
+    $lista.innerHTML = html || `<tr><td colspan="7">Nenhum lançamento encontrado.</td></tr>`;
+
+    $kpiReceitas.textContent = formatarValor(j.totais.receitas);
+    $kpiDespesas.textContent = formatarValor(j.totais.despesas);
+    $kpiSaldo.textContent    = formatarValor(j.totais.saldo);
+
+  }catch(e){
+    console.error(e);
+    $msgLista.textContent = e.message;
+    $msgLista.style.display='block';
+  }
+}
+
+// Excluir lançamento
+async function excluirLancamento(id){
+  if(!confirm('Excluir lançamento?')) return;
+  const fd = new FormData();
+  fd.set('id',id);
+  const r = await fetch('../php/excluir_lancamento.php',{method:'POST',body:fd,credentials:'include'});
+  const j = await r.json();
+  if(j.ok) carregarLancamentos(); else alert(j.msg||'Erro ao excluir');
+}
+
+// Eventos
+$btnFiltrar.addEventListener('click', carregarLancamentos);
+$btnLimpar.addEventListener('click', ()=>{ $mes.value=''; $tipo.value=''; $f_categoria.value=''; carregarLancamentos(); });
+$btnSair.addEventListener('click', async ()=>{ await fetch('../php/auth_logout.php',{credentials:'include'}); location.href='../auth/login.html'; });
+
+// Inicializa
+(async function(){
+  await carregarCategorias();
+  await carregarLancamentos();
+})();

@@ -3,39 +3,32 @@ header('Content-Type: application/json; charset=utf-8');
 require 'auth_guard.php';
 require 'conexao.php';
 
-$idUser   = (int)$_SESSION['id_usuario'];
-$mes      = trim($_GET['mes'] ?? '');
-$tipo     = trim($_GET['tipo'] ?? '');        // RECEITA|DESPESA
-$idFam    = (int)($_GET['id_familia'] ?? 0);
+$mes = preg_replace('/\D/','', $_GET['mes'] ?? '');
+$ym  = ($mes && strlen($mes)==6) ? $mes : date('Ym');
 
-$sql = "SELECT c.id_categoria, c.nome AS categoria, SUM(l.valor) AS total
-          FROM lancamento l
-          JOIN categoria c ON c.id_categoria = l.id_categoria
-         WHERE l.id_usuario = ? ";
-$types = 'i'; $params = [$idUser];
-
-if ($idFam > 0) { $sql .= " AND l.id_familia = ? "; $types .= 'i'; $params[] = $idFam; }
-else           { $sql .= " AND l.id_familia IS NULL "; }
-
-if ($mes !== '') {
-  $ano = (int)substr($mes,0,4); $mm = (int)substr($mes,4,2);
-  $sql .= " AND YEAR(l.data_mov)=? AND MONTH(l.data_mov)=? ";
-  $types .= 'ii'; $params[] = $ano; $params[] = $mm;
-}
-
-if ($tipo === 'RECEITA' || $tipo === 'DESPESA') {
-  $sql .= " AND l.tipo = ? "; $types .= 's'; $params[] = $tipo;
-}
-
-$sql .= " GROUP BY c.id_categoria, c.nome
-          ORDER BY total DESC";
-
+/*
+  Considerando DESPESAS por categoria no mês
+  (ajuste se quiser incluir receitas ou separar por natureza)
+*/
+$sql = "SELECT c.nome AS categoria, 
+               SUM(l.valor) AS total
+        FROM lancamento l
+        JOIN categoria c ON c.id_categoria = l.id_categoria
+        WHERE l.id_usuario = ?
+          AND DATE_FORMAT(l.data_mov,'%Y%m') = ?
+          AND l.tipo='DESPESA'
+        GROUP BY c.id_categoria, c.nome
+        ORDER BY total DESC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+$stmt->bind_param("is", $_SESSION['id_usuario'], $ym);
 $stmt->execute();
 $res = $stmt->get_result();
 
-$data = [];
-while ($r = $res->fetch_assoc()) $data[] = $r;
+$labels = [];
+$valores = [];
+while ($row = $res->fetch_assoc()) {
+  $labels[] = $row['categoria'];
+  $valores[] = (float)$row['total'];
+}
 
-echo json_encode(['ok'=>true,'data'=>$data]);
+echo json_encode(['ok'=>true,'labels'=>$labels,'valores'=>$valores]);

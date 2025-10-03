@@ -1,59 +1,77 @@
-<!DOCTYPE html><html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Alterar lançamento</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alterar lançamento • EcoManager</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/alterar_lancamento.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="brand"><div class="logo">E</div><h1>Alterar lançamento</h1></div>
-      <div class="nav"><a class="btn ghost" href="./index.html">Voltar</a></div>
+  <div class="container" style="max-width:980px; margin:32px auto;">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div><h1 style="margin:0">Alterar lançamento</h1></div>
+      </div>
+      <a class="btn btn-secondary" href="./index.html">Voltar</a>
     </div>
 
     <div class="card">
-      <input type="hidden" id="id">
-      <div class="row cols-2">
-        <div>
-          <label class="label">Data</label>
-          <input type="date" id="data_mov" class="input">
-        </div>
-        <div>
-          <label class="label">Descrição</label>
-          <input type="text" id="descricao" class="input">
-        </div>
-      </div>
+      <form id="formAlt" autocomplete="off">
+        <input type="hidden" id="id" name="id">
 
-      <div class="row cols-3" style="margin-top:14px">
-        <div>
-          <label class="label">Tipo</label>
-          <select id="tipo">
-            <option value="DESPESA">DESPESA</option>
-            <option value="RECEITA">RECEITA</option>
-          </select>
+        <div class="row">
+          <div class="col" style="min-width:220px">
+            <label for="data_mov">Data</label>
+            <input type="date" id="data_mov" name="data_mov" required>
+          </div>
+          <div class="col" style="flex:2 1 340px; min-width:280px">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" name="descricao" required>
+          </div>
         </div>
-        <div>
-          <label class="label">Categoria</label>
-          <select id="id_categoria"></select>
-        </div>
-        <div>
-          <label class="label">Valor (R$)</label>
-          <input type="number" step="0.01" id="valor" class="input">
-        </div>
-      </div>
 
-      <div style="margin-top:14px">
-        <label class="label">Família (opcional)</label>
-        <input type="number" id="id_familia" class="input" placeholder="id_familia">
-      </div>
+        <div class="row">
+          <div class="col">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" required>
+              <option value="DESPESA">DESPESA</option>
+              <option value="RECEITA">RECEITA</option>
+            </select>
+          </div>
 
-      <div class="form-actions" style="margin-top:16px">
-        <button class="btn primary" id="enviar">Salvar alterações</button>
-        <a class="btn ghost" href="./index.html">Cancelar</a>
-      </div>
+          <div class="col">
+            <label for="id_categoria">Categoria</label>
+            <select id="id_categoria" name="id_categoria" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+
+          <div class="col">
+            <label for="valor">Valor (R$)</label>
+            <input type="number" id="valor" name="valor" step="0.01" inputmode="decimal" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col" style="min-width:260px">
+            <label for="id_familia">Família (opcional)</label>
+            <select id="id_familia" name="id_familia">
+              <option value="">Nenhuma</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px; gap:10px">
+          <button type="submit" class="btn">Salvar alterações</button>
+          <a class="btn btn-secondary" href="./index.html">Cancelar</a>
+        </div>
+
+        <p id="msg" class="msg-error" style="display:none"></p>
+      </form>
     </div>
   </div>
-
-  <script src="../js/get_lancamento.js"></script>
-  <script src="../js/alterar_lancamento.js"></script>
-</body></html>
+</body>
+</html>
