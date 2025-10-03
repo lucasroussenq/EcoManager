@@ -1,81 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Novo Lançamento • EcoManager</title>
-  <link rel="stylesheet" href="../css/styles.css?v=7"/>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/inserir_lancamento.js" defer></script>
 </head>
 <body>
-  <div class="container">
+  <div class="container" style="max-width: 980px; margin: 40px auto;">
     <div class="app-top">
       <div class="app-brand">
         <div class="auth-icon">E</div>
         <div>
-          <h1>EcoManager</h1>
-          <p class="muted">Novo Lançamento</p>
+          <h1 style="margin:0">EcoManager</h1>
+          <p style="margin:0;color:var(--muted)">Novo lançamento</p>
         </div>
       </div>
-      <div class="actions">
-        <a class="btn btn-secondary" href="./index.html">Voltar</a>
-      </div>
+      <a class="btn btn-secondary" href="./index.html">Voltar</a>
     </div>
 
     <div class="card">
-      <form id="formLanc">
-        <div class="row" style="gap:12px">
-          <div style="flex:1 1 220px">
-            <label>Data</label>
-            <input type="date" name="data" required/>
+      <form id="formLanc" autocomplete="off">
+        <div class="row">
+          <div class="col" style="flex:1 1 220px; min-width:220px">
+            <label for="data_mov">Data</label>
+            <input type="date" id="data_mov" name="data_mov" required>
           </div>
-          <div style="flex:2 1 320px">
-            <label>Descrição</label>
-            <input type="text" name="descricao" placeholder="ex: Mercado, Energia..." required/>
+
+          <div class="col" style="flex:2 1 340px; min-width:280px">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" name="descricao" placeholder="Ex.: mercado, aluguel..." required>
           </div>
-          <div style="flex:1 1 220px">
-            <label>Categoria</label>
-            <select name="id_categoria" class="select" required>
+
+          <div class="col" style="flex:2 1 260px; min-width:240px">
+            <label for="id_categoria">Categoria</label>
+            <select id="id_categoria" name="id_categoria" required>
               <option value="">Selecione...</option>
             </select>
-          </div>
-          <div style="flex:1 1 220px">
-            <label>Natureza</label>
-            <select name="natureza" class="select" required>
-              <option value="">Selecione...</option>
-              <option value="E">Entrada</option>
-              <option value="S">Saída</option>
-            </select>
-          </div>
-          <div style="flex:1 1 180px">
-            <label>Valor</label>
-            <input type="number" name="valor" step="0.01" min="0" required/>
           </div>
         </div>
 
-        <div class="actions" style="margin-top:12px">
-          <button class="btn" type="submit">Salvar</button>
+        <div class="row">
+          <div class="col" style="flex:1 1 220px; min-width:220px">
+            <label for="tipo">Natureza</label>
+            <select id="tipo" name="tipo" required>
+              <option value="DESPESA">Saída</option>
+              <option value="RECEITA">Entrada</option>
+            </select>
+          </div>
+
+          <div class="col" style="flex:1 1 220px; min-width:220px">
+            <label for="valor">Valor</label>
+            <input type="number" id="valor" name="valor" step="0.01" min="0" placeholder="0,00" required>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px; gap:10px">
+          <button type="submit" class="btn">Salvar</button>
           <a class="btn btn-secondary" href="./index.html">Cancelar</a>
         </div>
 
-        <p id="msgLanc" class="msg-error"></p>
+        <p id="msg" class="msg-error" style="display:none"></p>
       </form>
     </div>
   </div>
 
+  <!-- Script mínimo para popular as categorias (sem alterar o visual) -->
   <script>
-    // TODO: carregar categorias de ../php/categoria_listar.php
-    // submit para ../php/lancamento_inserir.php
-    document.getElementById('formLanc').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const msg = document.getElementById('msgLanc');
-      msg.textContent = '';
-      try{
-        const r = await fetch('../php/lancamento_inserir.php',{ method:'POST', body: fd });
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Data de hoje no campo data
+      const dataInput = document.getElementById('data_mov');
+      if (dataInput && !dataInput.value) {
+        const hoje = new Date();
+        const yyyy = hoje.getFullYear();
+        const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoje.getDate()).padStart(2, '0');
+        dataInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+
+      // Carregar categorias
+      const msg = document.getElementById('msg');
+      const selCat = document.getElementById('id_categoria');
+
+      try {
+        const r = await fetch('../php/get_categorias.php', { credentials: 'include' });
         const j = await r.json();
-        if(j.ok){ location.href = './index.html'; }
-        else { msg.textContent = j.msg || 'Não foi possível salvar.'; }
-      }catch{ msg.textContent = 'Erro de rede.'; }
+
+        if (!j || !j.ok) {
+          throw new Error(j && j.msg ? j.msg : 'Falha ao carregar categorias.');
+        }
+
+        // Limpa e preenche
+        selCat.innerHTML = '<option value="">Selecione...</option>';
+        j.categorias.forEach(c => {
+          // espera { id_categoria, nome }
+          const opt = document.createElement('option');
+          opt.value = c.id_categoria;
+          opt.textContent = c.nome;
+          selCat.appendChild(opt);
+        });
+      } catch (e) {
+        if (msg) {
+          msg.style.display = 'block';
+          msg.textContent = 'Erro ao carregar categorias.';
+        }
+        console.error('get_categorias erro:', e);
+      }
     });
   </script>
 </body>

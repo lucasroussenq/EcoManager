@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EcoManager</title>
-  <link rel="stylesheet" href="../css/style.css"
+  <link rel="stylesheet" href="./css/styles.css">
+  <script>
+  // Decide pra onde ir baseado na sessão
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const r = await fetch('./php/auth_me.php', {credentials:'include'});
+      const j = await r.json();
+      if (j.ok) {
+        window.location.href = './lancamento/index.html';
+      } else {
+        window.location.href = './auth/login.html';
+      }
+    } catch(e){
+      window.location.href = './auth/login.html';
+    }
+  });
+  </script>
 </head>
-<body>
-  <div class="container">
-    <h1>EcoManager</h1>
-    <p>Bem-vindo! Faça login ou crie sua conta para continuar.</p>
-    <button class="btn btn-login" onclick="window.location.href='auth/login.html'">Login</button>
-    <button class="btn btn-cadastro" onclick="window.location.href='auth/registrar_usuario.html'">Cadastro</button>
-  </div>
-</body>
+<body></body>
 </html>

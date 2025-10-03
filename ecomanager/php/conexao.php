@@ -1,18 +1,14 @@
 <?php
-// php/conexao.php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "ecomanager";
 
-$DB_HOST = 'localhost';
-$DB_USER = 'root';
-$DB_PASS = '';            // ajuste se usar senha
-$DB_NAME = 'ecomanager';  // confirme o nome do BD
+$conn = new mysqli($host, $user, $pass, $dbname);
 
-try {
-  $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
-  $conn->set_charset('utf8mb4');
-} catch (Throwable $e) {
-  http_response_code(500);
-  header('Content-Type: application/json; charset=utf-8');
-  echo json_encode(['ok'=>false,'msg'=>'Falha na conexão com o banco','detalhe'=>$e->getMessage()]);
-  exit;
+if ($conn->connect_error) {
+    die("Erro na conexão: " . $conn->connect_error);
 }
+
+$conn->set_charset("utf8mb4");
+?>

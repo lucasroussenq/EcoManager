@@ -1,31 +1,67 @@
 <?php
-require '_auth_guard.php';
+header('Content-Type: application/json; charset=utf-8');
+require 'auth_guard.php';
 require 'conexao.php';
 
-$yyyymm   = trim($_GET['yyyymm'] ?? '');
-$tipo     = trim($_GET['tipo'] ?? '');
-$categoria= (int)($_GET['categoria'] ?? 0);
+$idUsuario = (int)$_SESSION['id_usuario'];
 
-$sql = "SELECT l.id, DATE_FORMAT(l.data_mov,'%Y-%m-%d') AS data_mov, l.tipo,
-               COALESCE(c.nome,'') AS categoria, l.descricao, l.valor
+$mes = trim($_GET['mes'] ?? '');
+$tipo = trim($_GET['tipo'] ?? '');
+$idCat = (int)($_GET['id_categoria'] ?? 0);
+
+$sql = "SELECT 
+          l.id_lancamento AS id,
+          l.data_mov,
+          l.tipo,
+          c.nome AS categoria,
+          l.descricao,
+          l.valor
         FROM lancamento l
-        LEFT JOIN categoria c ON c.id = l.id_categoria
+        LEFT JOIN categoria c ON c.id_categoria = l.id_categoria
         WHERE l.id_usuario = ?";
+$types = 'i';
+$params = [$idUsuario];
 
-$types = 'i'; $params = [$UID];
+if ($mes !== '') {
+  $sql .= " AND DATE_FORMAT(l.data_mov, '%Y%m') = ?";
+  $types .= 's';
+  $params[] = $mes;
+}
+if ($tipo === 'RECEITA' || $tipo === 'DESPESA') {
+  $sql .= " AND l.tipo = ?";
+  $types .= 's';
+  $params[] = $tipo;
+}
+if ($idCat > 0) {
+  $sql .= " AND l.id_categoria = ?";
+  $types .= 'i';
+  $params[] = $idCat;
+}
 
-if ($yyyymm!=='') { $sql.=" AND DATE_FORMAT(l.data_mov,'%Y%m') = ?"; $types.='s'; $params[]=$yyyymm; }
-if ($tipo==='RECEITA' || $tipo==='DESPESA') { $sql.=" AND l.tipo = ?"; $types.='s'; $params[]=$tipo; }
-if ($categoria>0) { $sql.=" AND l.id_categoria = ?"; $types.='i'; $params[]=$categoria; }
-
-$sql .= " ORDER BY l.data_mov DESC, l.id DESC";
+$sql .= " ORDER BY l.data_mov DESC, l.id_lancamento DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $res = $stmt->get_result();
 
-$data = [];
-while ($r = $res->fetch_assoc()) { $data[] = $r; }
+$linhas = [];
+$totRec = 0.0;
+$totDesp = 0.0;
 
-echo json_encode(['ok'=>true,'data'=>$data,'pagina'=>1]);
+while ($r = $res->fetch_assoc()) {
+  $r['data_br'] = date('d/m/Y', strtotime($r['data_mov']));
+  $r['valor'] = (float)$r['valor'];
+  if ($r['tipo'] === 'RECEITA') $totRec += $r['valor']; else $totDesp += $r['valor'];
+  $linhas[] = $r;
+}
+
+echo json_encode([
+  'ok' => true,
+  'registros' => $linhas,
+  'totais' => [
+    'receitas' => $totRec,
+    'despesas' => $totDesp,
+    'saldo' => $totRec - $totDesp
+  ]
+], JSON_UNESCAPED_UNICODE);

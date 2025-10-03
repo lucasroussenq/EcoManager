@@ -1,35 +1,22 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('loginForm');
-  const msg  = document.getElementById('loginMsg');
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  const msg = document.getElementById('loginMsg');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    msg.textContent = '';
+  try {
+    const resp = await fetch('/ecomanager/php/auth_login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams({ email, senha }),
+      credentials: 'same-origin'
+    });
+    const data = await resp.json();
+    if (!data.ok) { msg.textContent = data.msg || 'Falha no login'; return; }
 
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value.trim();
-
-    if (!email || !senha) {
-      msg.textContent = 'Informe e-mail e senha.';
-      return;
-    }
-
-    try {
-      const r = await fetch('../php/auth_login.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-        body: JSON.stringify({ email, senha })
-      });
-      const j = await r.json();
-
-      if (j.ok) {
-        window.location.href = '../lancamento/index.html';
-      } else {
-        msg.textContent = j.msg || 'Credenciais inválidas.';
-      }
-    } catch (err) {
-      msg.textContent = 'Falha de rede.';
-      console.error(err);
-    }
-  });
+    // vai direto para a página de lançamentos
+    window.location.replace('/ecomanager/lancamento/index.html');
+  } catch (err) {
+    msg.textContent = 'Erro de conexão.';
+  }
 });

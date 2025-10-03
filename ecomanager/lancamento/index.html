@@ -3,132 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lançamentos • EcoManager</title>
-  <link rel="stylesheet" href="../css/styles.css?v=7"/>
+  <title>EcoManager • Lançamentos</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/lancamento.js" defer></script>
 </head>
 <body>
-  <div class="container">
-
-    <!-- topo -->
+  <div class="container" style="max-width:1100px;margin:30px auto;">
     <div class="app-top">
       <div class="app-brand">
         <div class="auth-icon">E</div>
         <div>
-          <h1>EcoManager</h1>
-          <p class="muted">Meus Lançamentos</p>
+          <h1 style="margin:0">EcoManager</h1>
+          <p style="margin:0;color:var(--muted)">Lançamentos</p>
         </div>
       </div>
-      <div class="actions">
-        <a href="./inserir_lancamento.html" class="btn">Novo lançamento</a>
-        <button id="btnLogout" class="btn btn-secondary">Sair</button>
+      <div style="display:flex;gap:10px">
+        <a class="btn" href="./inserir_lancamento.html">Novo lançamento</a>
+        <button id="btnSair" class="btn btn-secondary">Sair</button>
       </div>
     </div>
 
-    <!-- filtros -->
-    <div class="card toolbar">
-      <div class="grid-3">
-        <div>
-          <label>Período</label>
-          <input id="filtroPeriodo" class="input" type="month"/>
+    <!-- Filtros -->
+    <div class="card">
+      <div class="row">
+        <div class="col" style="flex:1 1 200px;min-width:200px">
+          <label for="mes">Data</label>
+          <input id="mes" type="text" placeholder="202509">
         </div>
-        <div>
-          <label>Categoria</label>
-          <select id="filtroCategoria" class="select">
+        <div class="col" style="flex:1 1 200px;min-width:200px">
+          <label for="tipo">Tipo</label>
+          <select id="tipo">
+            <option value="">Todos</option>
+            <option value="RECEITA">Receita</option>
+            <option value="DESPESA">Despesa</option>
+          </select>
+        </div>
+        <div class="col" style="flex:2 1 320px;min-width:260px">
+          <label for="f_categoria">Categoria</label>
+          <select id="f_categoria">
             <option value="">Todas</option>
           </select>
         </div>
-        <div>
-          <label>Natureza</label>
-          <select id="filtroNatureza" class="select">
-            <option value="">Todas</option>
-            <option value="E">Entrada</option>
-            <option value="S">Saída</option>
-          </select>
-        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="btnFiltrar" class="btn">Filtrar</button>
+        <button id="btnLimpar" class="btn btn-secondary">Limpar</button>
       </div>
     </div>
 
     <!-- KPIs -->
     <div class="app-kpis">
       <div class="kpi">
-        <div class="kpi-title">Entradas</div>
-        <div id="kpiEntradas" class="kpi-value ok">R$ 0,00</div>
+        <div class="kpi-title">Total de Despesas</div>
+        <div class="kpi-value warn" id="kpi_despesas">R$ 0,00</div>
       </div>
       <div class="kpi">
-        <div class="kpi-title">Saídas</div>
-        <div id="kpiSaidas" class="kpi-value warn">R$ 0,00</div>
+        <div class="kpi-title">Total de Receitas</div>
+        <div class="kpi-value ok" id="kpi_receitas">R$ 0,00</div>
       </div>
       <div class="kpi">
-        <div class="kpi-title">Saldo</div>
-        <div id="kpiSaldo" class="kpi-value">R$ 0,00</div>
+        <div class="kpi-title">Saldo do mês</div>
+        <div class="kpi-value" id="kpi_saldo">R$ 0,00</div>
       </div>
     </div>
 
-    <!-- tabela -->
-    <div class="card table">
-      <table>
+    <!-- Tabela -->
+    <div class="card" style="margin-top:10px">
+      <table class="table">
         <thead>
           <tr>
-            <th>Data</th>
-            <th>Descrição</th>
-            <th>Categoria</th>
-            <th>Natureza</th>
-            <th>Valor</th>
-            <th style="width:140px">Ações</th>
+            <th>#</th>
+            <th>DATA</th>
+            <th>TIPO</th>
+            <th>CATEGORIA</th>
+            <th>DESCRIÇÃO</th>
+            <th>VALOR</th>
+            <th>AÇÕES</th>
           </tr>
         </thead>
-        <tbody id="tbodyLancamentos">
-          <!-- linhas via JS -->
-        </tbody>
+        <tbody id="lista"></tbody>
       </table>
+      <p id="msgLista" class="msg-error" style="display:none;margin-top:10px"></p>
     </div>
-
   </div>
-
-  <script>
-   
-    const dados = [
-      {id:1, data:'2025-09-28', desc:'Mercado', categoria:'Alimentação', nat:'S', valor: 120.50},
-      {id:2, data:'2025-09-27', desc:'Salário', categoria:'Renda', nat:'E', valor: 4500.00},
-      {id:3, data:'2025-09-26', desc:'Energia', categoria:'Moradia', nat:'S', valor: 230.00},
-    ];
-
-    const tbody = document.getElementById('tbodyLancamentos');
-    const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-
-    function render(){
-      tbody.innerHTML = '';
-      let entradas=0, saidas=0;
-      for(const l of dados){
-        if(l.nat==='E') entradas+=l.valor; else saidas+=l.valor;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${new Date(l.data).toLocaleDateString('pt-BR')}</td>
-          <td>${l.desc}</td>
-          <td>${l.categoria}</td>
-          <td>${l.nat==='E'?'Entrada':'Saída'}</td>
-          <td>${fmt(l.valor)}</td>
-          <td class="actions-cell">
-            <a href="./inserir_lancamento.html?id=${l.id}">Editar</a>
-            <a href="#" onclick="remover(${l.id});return false;">Excluir</a>
-          </td>`;
-        tbody.appendChild(tr);
-      }
-      document.getElementById('kpiEntradas').textContent = fmt(entradas);
-      document.getElementById('kpiSaidas').textContent   = fmt(saidas);
-      document.getElementById('kpiSaldo').textContent    = fmt(entradas - saidas);
-    }
-
-    function remover(id){
-      alert('Excluir id '+id+' (implementar no PHP)');
-    }
-
-    document.getElementById('btnLogout').addEventListener('click', async ()=>{
-      try{ await fetch('../php/auth_logout.php'); }catch{}
-      location.href = '../auth/login.html';
-    });
-
-    render();
-  </script>
 </body>
 </html>
