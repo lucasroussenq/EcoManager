@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gráfico Pizza • EcoManager</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <script src="/ecomanager/public/assets/js/base.js"></script>
+</head>
+<body>
+  <div class="container" style="max-width:900px;margin:30px auto">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div><h1 style="margin:0">EcoManager</h1><p style="margin:0;color:var(--muted)">Gastos por categoria</p></div>
+      </div>
+      <a class="btn btn-secondary" href="../lancamento/index.html">Voltar</a>
+    </div>
+    <div class="card">
+      <label>Mês (YYYYMM)</label>
+      <input id="mes" placeholder="202510" style="max-width:200px">
+      <button class="btn" id="btnAtualizar">Atualizar</button>
+    </div>
+    <div class="card" style="display:grid;place-items:center">
+      <canvas id="pizza" width="600" height="380"></canvas>
+    </div>
+  </div>
+
+  
+  <script src="../assets/js/grafico_pizza.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EcoManager • Lançamentos</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+
+  <script>
+    window.API_BASE = '/ecomanager/api';
+    window.apiFetch = async (path, opts = {}) => {
+      const full = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+      const resp = await fetch(full, { credentials: 'include', cache: 'no-store', ...opts });
+      if (resp.status === 401 || resp.status === 403) {
+        if (!location.pathname.includes('/public/auth/')) location.replace('/ecomanager/public/auth/login.html');
+        throw new Error('Não autenticado');
+      }
+      return resp;
+    };
+  </script>
+  <script>
+    (async ()=> {
+      try {
+        const r = await apiFetch('/auth/me.php'); const j = await r.json(); if (!j.ok) throw 0;
+      } catch { location.replace('/ecomanager/public/auth/login.html'); }
+    })();
+  </script>
+
+  <script src="../assets/js/lancamento.js" defer></script>
+</head>
+<body>
+  <div class="container" style="max-width:1100px;margin:30px auto;">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div>
+          <h1 style="margin:0">EcoManager</h1>
+          <p style="margin:0;color:var(--muted)">Lançamentos</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <a class="btn" href="./inserir_lancamento.html">Novo lançamento</a>
+        <a class="btn btn-secondary" href="../graficos/pizza.html">Pizza por categoria</a>
+        <a class="btn btn-secondary" href="../graficos/barras.html">Barras (mês)</a>
+        <button id="btnSair" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="col" style="flex:1 1 200px;min-width:200px">
+          <label for="mes">Data</label>
+          <input id="mes" type="text" placeholder="202509">
+        </div>
+        <div class="col" style="flex:1 1 200px;min-width:200px">
+          <label for="tipo">Tipo</label>
+          <select id="tipo">
+            <option value="">Todos</option>
+            <option value="RECEITA">Receita</option>
+            <option value="DESPESA">Despesa</option>
+          </select>
+        </div>
+        <div class="col" style="flex:2 1 320px;min-width:260px">
+          <label for="f_categoria">Categoria</label>
+          <select id="f_categoria">
+            <option value="">Todas</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="btnFiltrar" class="btn">Filtrar</button>
+        <button id="btnLimpar" class="btn btn-secondary">Limpar</button>
+      </div>
+    </div>
+
+    <div class="app-kpis">
+      <div class="kpi">
+        <div class="kpi-title">Total de Despesas</div>
+        <div class="kpi-value warn" id="kpi_despesas">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-title">Total de Receitas</div>
+        <div class="kpi-value ok" id="kpi_receitas">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-title">Saldo do mês</div>
+        <div class="kpi-value" id="kpi_saldo">R$ 0,00</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>DATA</th>
+            <th>TIPO</th>
+            <th>CATEGORIA</th>
+            <th>DESCRIÇÃO</th>
+            <th>VALOR</th>
+            <th>AÇÕES</th>
+          </tr>
+        </thead>
+        <tbody id="lista"></tbody>
+      </table>
+      <p id="msgLista" class="msg-error" style="display:none;margin-top:10px"></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Login • EcoManager</title>
+<link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon">E</div>
+      <div>
+        <h1>EcoManager</h1>
+        <p>Entrar</p>
+      </div>
+    </div>
+
+    <form id="loginForm">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" required />
+
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+
+    <p class="auth-link">Ainda não tem conta? <a href="registrar_usuario.html">Cadastrar</a></p>
+    <p id="loginMsg" class="msg-error"></p>
+  </div>
+
+ <script src="/ecomanager/public/assets/js/base.js"></script>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  const msg = document.getElementById('loginMsg');
+
+  try {
+    const r = await apiFetch('/auth/login.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+      body: new URLSearchParams({ email, senha })
+    });
+    const d = await r.json();
+
+    if (!d.ok) {
+      msg.textContent = d.msg || 'E-mail ou senha incorretos';
+      return;
+    }
+
+    window.location.replace('/ecomanager/public/lancamento/index.html');
+  } catch {
+    msg.textContent = 'Erro de conexão com o servidor.';
+  }
+});
+</script>

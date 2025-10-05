@@ -1,25 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>EcoManager</title>
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+  <script src="/ecomanager/public/assets/js/base.js"></script>
   <script>
-  // Decide pra onde ir baseado na sessão
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const r = await fetch('./php/auth_me.php', {credentials:'include'});
-      const j = await r.json();
-      if (j.ok) {
-        window.location.href = './lancamento/index.html';
-      } else {
-        window.location.href = './auth/login.html';
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const r = await apiFetch('/auth/me.php');
+        const j = await r.json();
+        if (j.ok) {
+          location.replace('/ecomanager/public/lancamento/index.html');
+        } else {
+          location.replace('/ecomanager/public/auth/login.html');
+        }
+      } catch {
+        location.replace('/ecomanager/public/auth/login.html');
       }
-    } catch(e){
-      window.location.href = './auth/login.html';
-    }
-  });
+    });
   </script>
 </head>
 <body></body>

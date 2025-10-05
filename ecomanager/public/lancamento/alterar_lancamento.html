@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alterar lançamento • EcoManager</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+
+  <script>
+    window.API_BASE = '/ecomanager/api';
+    window.apiFetch = async (path, opts = {}) => {
+      const full = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+      const resp = await fetch(full, { credentials: 'include', cache: 'no-store', ...opts });
+      if (resp.status === 401 || resp.status === 403) {
+        if (!location.pathname.includes('/public/auth/')) location.replace('/ecomanager/public/auth/login.html');
+        throw new Error('Não autenticado');
+      }
+      return resp;
+    };
+  </script>
+  <script>
+    (async ()=> {
+      try {
+        const r = await apiFetch('/auth/me.php'); const j = await r.json(); if (!j.ok) throw 0;
+      } catch { location.replace('/ecomanager/public/auth/login.html'); }
+    })();
+  </script>
+
+  <script src="../assets/js/alterar_lancamento.js" defer></script>
+</head>
+<body>
+  <div class="container" style="max-width:980px; margin:32px auto;">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div><h1 style="margin:0">Alterar lançamento</h1></div>
+      </div>
+      <a class="btn btn-secondary" href="./index.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <form id="formAlt" autocomplete="off">
+        <input type="hidden" id="id" name="id">
+
+        <div class="row">
+          <div class="col" style="min-width:220px">
+            <label for="data_mov">Data</label>
+            <input type="date" id="data_mov" name="data_mov" required>
+          </div>
+          <div class="col" style="flex:2 1 340px; min-width:280px">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" name="descricao" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" required>
+              <option value="DESPESA">DESPESA</option>
+              <option value="RECEITA">RECEITA</option>
+            </select>
+          </div>
+
+          <div class="col">
+            <label for="id_categoria">Categoria</label>
+            <select id="id_categoria" name="id_categoria" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+
+          <div class="col">
+            <label for="valor">Valor (R$)</label>
+            <input type="number" id="valor" name="valor" step="0.01" inputmode="decimal" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col" style="min-width:260px">
+            <label for="id_familia">Família (opcional)</label>
+            <select id="id_familia" name="id_familia">
+              <option value="">Nenhuma</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px; gap:10px">
+          <button type="submit" class="btn">Salvar alterações</button>
+          <a class="btn btn-secondary" href="./index.html">Cancelar</a>
+        </div>
+
+        <p id="msg" class="msg-error" style="display:none"></p>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

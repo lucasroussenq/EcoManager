@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gráfico Barras • EcoManager</title>
+<link rel="stylesheet" href="../assets/css/styles.css" />
+
+<script>
+  window.API_BASE = '/ecomanager/api';
+  window.apiFetch = async (path, opts = {}) => {
+    const full = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+    const resp = await fetch(full, { credentials: 'include', cache: 'no-store', ...opts });
+    if (resp.status === 401 || resp.status === 403) {
+      if (!location.pathname.includes('/public/auth/')) location.replace('/ecomanager/public/auth/login.html');
+      throw new Error('Não autenticado');
+    }
+    return resp;
+  };
+</script>
+<script>
+  (async()=>{ try{
+    const r=await apiFetch('/auth/me.php'); const j=await r.json(); if(!j.ok) throw 0;
+  }catch{ location.replace('/ecomanager/public/auth/login.html'); }})();
+</script>
+
+<script defer src="../assets/js/grafico_barras.js"></script>
+</head>
+<body>
+<div class="container" style="max-width:900px;margin:30px auto">
+  <div class="app-top">
+    <div class="app-brand"><div class="auth-icon">E</div><div><h1 style="margin:0">EcoManager</h1><p style="margin:0;color:var(--muted)">Receitas x Despesas (mês)</p></div></div>
+    <a class="btn btn-secondary" href="../lancamento/index.html">Voltar</a>
+  </div>
+  <div class="card">
+    <label>Mês (YYYYMM)</label>
+    <input id="mes" placeholder="202510" style="max-width:200px">
+    <button class="btn" id="btnAtualizar">Atualizar</button>
+  </div>
+  <div class="card" style="display:grid;place-items:center">
+    <canvas id="barras" width="700" height="380"></canvas>
+  </div>
+</div>
+</body>
+</html>
