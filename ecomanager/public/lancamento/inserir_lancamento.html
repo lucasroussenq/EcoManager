@@ -9,31 +9,44 @@
   <!-- base.js embutido -->
   <script>
     window.API_BASE = '/ecomanager/api';
+
+    // helper padrão do teu projeto
     window.apiFetch = async (path, opts = {}) => {
-      const full = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
-      const resp = await fetch(full, { credentials: 'include', cache: 'no-store', ...opts });
+      const full = path.startsWith('http')
+        ? path
+        : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+
+      const resp = await fetch(full, {
+        credentials: 'include',
+        cache: 'no-store',
+        ...opts
+      });
+
+      // se não estiver logado, manda pro login
       if (resp.status === 401 || resp.status === 403) {
-        if (!location.pathname.includes('/public/auth/')) location.replace('/ecomanager/public/auth/login.html');
+        if (!location.pathname.includes('/public/auth/')) {
+          location.replace('/ecomanager/public/auth/login.html');
+        }
         throw new Error('Não autenticado');
       }
       return resp;
     };
   </script>
 
-  <!-- Auth-guard simples -->
+  <!-- checa login rápido -->
   <script>
-    (async ()=> {
+    (async () => {
       try {
         const r = await apiFetch('/auth/me.php');
         const j = await r.json();
         if (!j.ok) throw 0;
-      } catch {
+      } catch (e) {
         location.replace('/ecomanager/public/auth/login.html');
       }
     })();
   </script>
 
-  <!-- JS da página -->
+  <!-- JS desta página -->
   <script src="../assets/js/inserir_lancamento.js" defer></script>
 </head>
 <body>
@@ -46,7 +59,8 @@
           <p style="margin:0;color:var(--muted)">Novo lançamento</p>
         </div>
       </div>
-      <a class="btn btn-secondary" href="./index.html">Voltar</a>
+      <<a class="btn btn-secondary" href="./index.html">Voltar</a>
+      <!-- ↑↑↑ coloca aqui uma página que EXISTE no teu public -->
     </div>
 
     <div class="card">
@@ -83,11 +97,18 @@
             <label for="valor">Valor</label>
             <input type="number" id="valor" name="valor" step="0.01" min="0" placeholder="0,00" required>
           </div>
+
+          <div class="col" style="flex:1 1 240px; min-width:220px">
+            <label for="id_familia">Família (opcional)</label>
+            <select id="id_familia" name="id_familia">
+              <option value="">Sem família</option>
+            </select>
+          </div>
         </div>
 
         <div class="row" style="margin-top:12px; gap:10px">
           <button type="submit" class="btn">Salvar</button>
-          <a class="btn btn-secondary" href="./index.html">Cancelar</a>
+          <a class="btn btn-secondary" href="../index.html">Cancelar</a>
         </div>
 
         <p id="msg" class="msg-error" style="display:none"></p>
@@ -95,7 +116,7 @@
     </div>
   </div>
 
-  <!-- Define a data atual automaticamente -->
+  <!-- preenche data com hoje -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const dataInput = document.getElementById('data_mov');

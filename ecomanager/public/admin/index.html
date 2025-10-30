@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Painel do Administrador • EcoManager</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <script src="/ecomanager/public/assets/js/base.js"></script>
+  <script>
+  // garante que é admin
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const r = await apiFetch('/auth/me.php');
+      const j = await r.json();
+      if (!j.ok || (j.papel !== 'ADMIN' && j.perfil !== 'ADMIN')) {
+        // chutamos pro menu normal
+        location.replace('/ecomanager/public/lancamento/index.html');
+      }
+    } catch (e) {
+      location.replace('/ecomanager/public/auth/login.html');
+    }
+  });
+  </script>
+</head>
+<body>
+  <div class="container" style="max-width: 720px; margin: 40px auto;">
+    <h1 style="text-align:center; margin-bottom:10px;"> Painel do Administrador</h1>
+    <p style="text-align:center; margin-bottom:20px;">Gerencie usuários, permissões e relatórios do sistema.</p>
+
+    <div class="card">
+      <button class="btn" style="width:100%; margin-bottom:12px;"
+              onclick="location.href='/ecomanager/public/admin/usuarios.html'">
+        Gerenciar Usuários e Permissões
+      </button>
+
+      <button class="btn" style="width:100%; margin-bottom:12px;"
+              onclick="location.href='/ecomanager/public/admin/relatorios.html'">
+        Ver Relatórios Consolidados
+      </button>
+
+      <button class="btn btn-secondary" style="width:100%;"
+              onclick="location.href='/ecomanager/public/lancamento/index.html'">
+        Voltar ao Menu Principal
+      </button>
+    </div>
+  </div>
+</body>
+</html>

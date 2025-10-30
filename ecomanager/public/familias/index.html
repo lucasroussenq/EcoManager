@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Famílias • EcoManager</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <script src="/ecomanager/public/assets/js/base.js"></script>
+
+  <script>
+    (async () => {
+      try {
+        const r = await apiFetch('/auth/me.php');
+        const j = await r.json();
+        if (!j.ok) throw 0;
+      } catch (e) {
+        location.replace('/ecomanager/public/auth/login.html');
+      }
+    })();
+  </script>
+
+  <script src="/ecomanager/public/assets/js/familia.js" defer></script>
+</head>
+<body>
+  <div class="container" style="max-width:950px;margin:30px auto">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div>
+          <h1 style="margin:0">EcoManager</h1>
+          <p style="margin:0;color:var(--muted)">Famílias</p>
+        </div>
+      </div>
+      <a class="btn btn-secondary" href="../lancamento/index.html">Voltar</a>
+    </div>
+
+    <div class="card">
+  <h3>Minhas famílias</h3>
+  <div style="display:flex;gap:10px;align-items:center">
+    <select id="familia" style="max-width:260px">
+      <option value="">(carregando...)</option>
+    </select>
+    <button class="btn" id="btnCriarFam" type="button">Criar família</button>
+    <button class="btn btn-secondary" id="btnPermissoes" type="button">Ver permissões (console)</button>
+  </div>
+</div>
+
+
+    <div class="card" style="margin-top:15px">
+      <h3>Membros</h3>
+      <table class="table">
+        <thead>
+          <tr><th>Nome</th><th>E-mail</th><th>Papel</th></tr>
+        </thead>
+        <tbody id="membros"></tbody>
+      </table>
+
+      <h4 style="margin-top:14px">Adicionar membro</h4>
+      <form id="formAdd" class="row" style="gap:10px">
+        <input id="novoEmail" placeholder="E-mail do usuário" required>
+        <select id="novoPapel">
+          <option value="MEMBRO">MEMBRO</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+        <button class="btn" type="submit">Adicionar</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

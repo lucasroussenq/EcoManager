@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Gerenciar Usuários • EcoManager</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <script src="/ecomanager/public/assets/js/base.js"></script>
+  <style>
+    table.admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    table.admin-table th, table.admin-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .badge {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:8px;
+      font-size: .75rem;
+    }
+    .badge-admin { background:#1d4ed8; }
+    .badge-user  { background:#334155; }
+  </style>
+</head>
+<body>
+<div class="container" style="max-width: 950px; margin: 40px auto;">
+  <div class="app-top">
+    <div class="app-brand">
+      <div class="auth-icon">E</div>
+      <div>
+        <h1 style="margin:0">Usuários do sistema</h1>
+        <p style="margin:0; color:var(--muted)">Gerencie perfis e status de acesso.</p>
+      </div>
+    </div>
+    <a class="btn btn-secondary" href="./index.html">Voltar</a>
+  </div>
+
+  <div class="card">
+    <p id="msg" class="msg-error" style="display:none"></p>
+    <table class="admin-table" id="tbUsers">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Perfil</th>
+          <th>Ativo</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function carregarUsuarios() {
+  const tb = document.querySelector('#tbUsers tbody');
+  tb.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
+
+  try {
+    const r = await apiFetch('/admin/usuarios/list.php');
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.msg || 'Erro ao listar');
+
+    if (!j.usuarios || j.usuarios.length === 0) {
+      tb.innerHTML = '<tr><td colspan="6">Nenhum usuário encontrado.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = '';
+    j.usuarios.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.id_usuario}</td>
+        <td>${u.nome ?? '-'}</td>
+        <td>${u.email ?? '-'}</td>
+        <td>
+          <select data-id="${u.id_usuario}" class="sel-perfil">
+            <option value="USER" ${u.perfil === 'USER' ? 'selected' : ''}>USER</option>
+            <option value="ADMIN" ${u.perfil === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+          </select>
+        </td>
+        <td>
+          <input type="checkbox" data-id="${u.id_usuario}" class="chk-ativo" ${u.ativo ? 'checked' : ''} />
+        </td>
+        <td>
+          <button class="btn btn-secondary btn-sm" data-id="${u.id_usuario}" onclick="salvarLinha(${u.id_usuario})">Salvar</button>
+        </td>
+      `;
+      tb.appendChild(tr);
+    });
+
+  } catch (e) {
+    console.error(e);
+    tb.innerHTML = '<tr><td colspan="6">Erro ao carregar.</td></tr>';
+  }
+}
+
+async function salvarLinha(id) {
+  const sel = document.querySelector(`select.sel-perfil[data-id="${id}"]`);
+  const chk = document.querySelector(`input.chk-ativo[data-id="${id}"]`);
+  const perfil = sel.value;
+  const ativo  = chk.checked ? 1 : 0;
+
+  const r = await apiFetch('/admin/usuarios/update.php', {
+    method: 'POST',
+    body: new URLSearchParams({
+      id_usuario: id,
+      perfil,
+      ativo
+    })
+  });
+  const j = await r.json();
+  if (!j.ok) {
+    alert(j.msg || 'Erro ao atualizar');
+  } else {
+    alert('Atualizado!');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', carregarUsuarios);
+</script>
+</body>
+</html>

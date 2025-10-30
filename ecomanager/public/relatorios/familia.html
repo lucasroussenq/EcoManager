@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Relatório Familiar • EcoManager</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    .stat-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 14px 18px;
+      min-width: 140px;
+    }
+  </style>
+
+  <!-- base mínima -->
+  <script>
+    window.API_BASE = '/ecomanager/api';
+    window.apiFetch = async (path, opts = {}) => {
+      const full = path.startsWith('http')
+        ? path
+        : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+      const resp = await fetch(full, {
+        credentials: 'include',
+        cache: 'no-store',
+        ...opts
+      });
+      if (resp.status === 401 || resp.status === 403) {
+        location.replace('/ecomanager/public/auth/login.html');
+        throw new Error('Não autenticado');
+      }
+      return resp;
+    };
+  </script>
+</head>
+<body>
+  <div class="container" style="max-width: 1000px; margin: 40px auto;">
+    <div class="app-top">
+      <div class="app-brand">
+        <div class="auth-icon">E</div>
+        <div>
+          <h1 style="margin:0">EcoManager</h1>
+          <p style="margin:0; color:var(--muted)">Relatório Familiar</p>
+        </div>
+      </div>
+      <a class="btn btn-secondary" href="../lancamento/index.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <label for="mes">Mês (YYYYMM)</label>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="text" id="mes" placeholder="202510" style="max-width:180px;">
+        <button id="btnVer" class="btn">Ver</button>
+      </div>
+      <p id="msg" class="msg-error" style="display:none; margin-top:10px;"></p>
+    </div>
+
+    <div id="resultado" class="card" style="margin-top:20px; display:none;">
+      <h2 style="margin-top:0;">Resumo do mês</h2>
+      <p><strong>Mês:</strong> <span id="rMes"></span></p>
+      <p><strong>Família:</strong> <span id="rFam"></span></p>
+
+      <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;">
+        <div class="stat-box">
+          <p style="margin:0; color:var(--muted)">Receitas</p>
+          <h3 id="rReceitas" style="margin:0;">R$ 0,00</h3>
+        </div>
+        <div class="stat-box">
+          <p style="margin:0; color:var(--muted)">Despesas</p>
+          <h3 id="rDespesas" style="margin:0;">R$ 0,00</h3>
+        </div>
+        <div class="stat-box">
+          <p style="margin:0; color:var(--muted)">Saldo</p>
+          <h3 id="rSaldo" style="margin:0;">R$ 0,00</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS INLINE PRA GARANTIR QUE RODA -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const $mes = document.getElementById('mes');
+      const $btn = document.getElementById('btnVer');
+      const $msg = document.getElementById('msg');
+
+      // mês padrão = atual
+      if ($mes && !$mes.value) {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        $mes.value = y + '' + m;
+      }
+
+      $btn.addEventListener('click', async () => {
+        // só pra você ver que clicou:
+        console.log('Cliquei no Ver');
+
+        if ($msg) $msg.style.display = 'none';
+
+        const mes = $mes.value.trim();
+        if (!/^\d{6}$/.test(mes)) {
+          $msg.textContent = 'Use o formato YYYYMM, ex.: 202510';
+          $msg.style.display = 'block';
+          return;
+        }
+
+        try {
+          const r = await apiFetch(`/relatorios/familia_mensal.php?mes=${encodeURIComponent(mes)}`);
+          const j = await r.json();
+          console.log('Resposta da API:', j);
+
+          if (!j.ok) {
+            $msg.textContent = j.msg || 'Não foi possível gerar o relatório.';
+            $msg.style.display = 'block';
+            return;
+          }
+
+          document.getElementById('rMes').textContent = j.mes;
+          document.getElementById('rFam').textContent = j.id_familia ? 'Família #' + j.id_familia : '—';
+          document.getElementById('rReceitas').textContent = 'R$ ' + Number(j.receitas).toFixed(2);
+          document.getElementById('rDespesas').textContent = 'R$ ' + Number(j.despesas).toFixed(2);
+          document.getElementById('rSaldo').textContent = 'R$ ' + Number(j.saldo).toFixed(2);
+
+          document.getElementById('resultado').style.display = 'block';
+        } catch (err) {
+          console.error(err);
+          $msg.textContent = 'Erro de rede ao buscar relatório.';
+          $msg.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

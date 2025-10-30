@@ -23,3 +23,11 @@ function requireAuth(): void
         exit;
     }
 }
+
+function requireAdmin() {
+  if (!isset($_SESSION['papel']) || $_SESSION['papel'] !== 'ADMIN') {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'msg' => 'Acesso restrito a administradores.']);
+    exit;
+  }
+}

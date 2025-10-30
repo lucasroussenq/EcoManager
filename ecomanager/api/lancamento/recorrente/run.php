@@ -49,6 +49,6 @@ try {
  $mysqli->commit();
   echo json_encode(['ok'=>true,'gerados'=>$gerados]);
 } catch (mysqli_sql_exception $e) {
- $mysqli->rollback()
+  $conn->rollback();
   echo json_encode(['ok'=>false,'msg'=>'Erro ao gerar recorrentes']);
 }

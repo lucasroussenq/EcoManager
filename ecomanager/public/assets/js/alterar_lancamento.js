@@ -64,3 +64,52 @@ $form?.addEventListener('submit', async (e)=>{
 });
 
 (async ()=>{ try { await carregaCategorias(); await carregaFamilias(); await carregaLancamento(); } catch(e){ showMsg(e.message); } })();
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('formAlterarLancamento');
+  if (!form) return;
+
+  const msg = document.getElementById('msgErro'); // opcional
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+
+    const fd = new FormData(form);
+
+    try {
+      const resp = await fetch('/ecomanager/api/lancamento/atualizar.php', {
+        method: 'POST',
+        body: fd,
+        credentials: 'include'
+      });
+
+      // LER UMA ÚNICA VEZ
+      const text = await resp.text();
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Resposta não-JSON do atualizar.php:', text);
+        if (msg) msg.textContent = text || 'Erro ao atualizar.';
+        alert(text || 'Erro ao atualizar.');
+        return;
+      }
+
+      if (!resp.ok || data.ok === false) {
+        const m = data.msg || 'Erro ao atualizar lançamento.';
+        if (msg) msg.textContent = m;
+        alert(m);
+        return;
+      }
+
+      if (msg) msg.textContent = '';
+      alert(data.msg || 'Lançamento atualizado com sucesso!');
+      // volta pra lista
+      window.location.href = '/ecomanager/public/lancamento/listar.html';
+    } catch (err) {
+      console.error(err);
+      if (msg) msg.textContent = 'Falha na comunicação com o servidor.';
+      alert('Falha na comunicação com o servidor.');
+    }
+  });
+});
