@@ -1,0 +1,152 @@
+@charset "UTF-8";
+
+/* ========== EcoManager – estilos globais unificados ========== */
+:root{
+  --bg:#0b1420; --card:#101a29; --card-2:#0e1827;
+  --txt:#dbe7ff; --muted:#94a3b8; --accent:#4ea8ff; --accent-2:#73ffd6;
+  --danger:#ff6b6b; --ok:#22c55e; --border:rgba(255,255,255,.08);
+  --shadow: 0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font:16px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--txt);
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #0f2240 0%, transparent 60%),
+    radial-gradient(1000px 700px at 110% 10%, #102c46 0%, transparent 55%),
+    linear-gradient(180deg, #0a1220, #0a1220 60%, #0b1420 100%);
+}
+
+/* -------- utilidades -------- */
+.container{max-width:1080px;margin:0 auto;padding:24px}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.card{
+  background:linear-gradient(180deg, var(--card), var(--card-2));
+  border:1px solid var(--border);
+  border-radius:16px; box-shadow:var(--shadow);
+  padding:16px;
+}
+h1,h2,h3{margin:0 0 10px 0}
+a:not(.btn){ /* aplica gradiente apenas em links que não sejam botões */
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.5s ease, opacity 0.3s ease;
+}
+a:hover:not(.btn){
+  background-position: 100%;
+  opacity: 0.9;
+}
+
+/* -------- mensagens -------- */
+.msg-error{color:var(--danger);margin-top:8px}
+.msg-success{color:var(--ok);margin-top:8px}
+
+/* -------- inputs & botões -------- */
+label{display:block;font-size:.9rem;color:var(--muted);margin:10px 0 6px}
+input,select,textarea{
+  width:100%; padding:12px 14px; border-radius:12px;
+  border:1px solid var(--border); outline:0; color:var(--txt);
+  background:rgba(255,255,255,.03); transition:.2s border-color,.2s box-shadow;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(78,168,255,.75);
+  box-shadow:0 0 0 6px rgba(78,168,255,.2);
+  animation: pulse 0.4s ease;
+}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:linear-gradient(180deg, var(--accent), #338cff);
+  color:#041528; /* garante que o texto apareça */
+  font-weight:600; padding:10px 16px; border:0; border-radius:12px;
+  box-shadow:0 6px 20px rgba(52,140,255,.35);
+  cursor:pointer;
+  animation: fadeIn 0.5s ease forwards;
+  transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+}
+.btn:hover{
+  transform: translateY(-2px) scale(1.02);
+  filter: saturate(1.15) brightness(1.05);
+  box-shadow: 0 8px 28px rgba(52,140,255,.45);
+}
+.btn:active{transform:translateY(0)}
+.btn-secondary{
+  background:transparent; color:var(--txt); border:1px solid var(--border); box-shadow:none;
+}
+
+/* ========== Telas de Autenticação ========== */
+.auth-container{
+  min-height:100vh; display:grid; place-items:center; padding:24px;
+}
+.auth-card{
+  width:100%; max-width:520px; padding:28px 26px;
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow);
+  animation: fadeIn 0.8s ease forwards;
+}
+.auth-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.auth-icon{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  color:#08243d;font-weight:800;background:linear-gradient(180deg,#78bbff,#4ea8ff);
+  box-shadow:0 6px 20px rgba(78,168,255,.35);
+}
+.auth-header h1{font-size:1.4rem; animation: fadeIn 0.7s ease forwards;}
+.auth-header p{color:var(--muted);margin:0}
+
+/* espaçamentos dos formulários */
+.auth-card form{margin-top:8px}
+.auth-card .btn{margin-top:14px;width:110px}
+
+/* ========== Cabeçalho (lista de lançamentos) ========== */
+.app-top{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px;
+}
+.app-brand{display:flex;align-items:center;gap:10px; animation: fadeIn 0.7s ease forwards;}
+.app-brand .auth-icon{width:34px;height:34px;border-radius:10px}
+.app-kpis{display:grid;grid-template-columns:repeat(3,minmax(210px,1fr));gap:14px;margin:12px 0 6px}
+.kpi{
+  background:linear-gradient(180deg, var(--card), var(--card-2));
+  border:1px solid var(--border); border-radius:14px; padding:14px;
+  animation: fadeIn 0.8s ease forwards;
+}
+.kpi .kpi-title{color:var(--muted);font-size:.9rem}
+.kpi .kpi-value{font-size:1.4rem;font-weight:800}
+.kpi .kpi-value.ok{color:var(--accent-2)}
+.kpi .kpi-value.warn{color:#ffb86b}
+.kpi:hover{animation: pulse 0.6s ease forwards;}
+
+/* ========== Tabela simples ========== */
+.table{width:100%;border-collapse:collapse;margin-top:10px}
+.table th,.table td{padding:12px 10px;border-bottom:1px solid var(--border)}
+.table th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.04em}
+.table tr:hover td{background:rgba(255,255,255,.02); animation: highlight 0.8s ease;}
+.table a{color:var(--accent)}
+.actions-cell a{color:#93c5fd;text-decoration:none;margin-right:10px}
+.actions-cell a:hover{color:#bfdbfe;text-decoration:underline}
+
+/* ------- filtros ------- */
+.toolbar .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.input,.select{width:100%;padding:10px 12px;border-radius:12px;background:#0f1626;border:1px solid var(--border);color:var(--txt)}
+
+/* ================== ANIMAÇÕES ================== */
+
+/* fade-in */
+@keyframes fadeIn {
+  0% {opacity:0; transform: translateY(10px);}
+  100% {opacity:1; transform: translateY(0);}
+}
+/* pulso leve */
+@keyframes pulse {
+  0%, 100% {transform: scale(1);}
+  50% {transform: scale(1.03);}
+}
+/* destaque suave */
+@keyframes highlight {
+  0%, 100% {background-position: 0%;}
+  50% {background-position: 100%;}
+}
+
